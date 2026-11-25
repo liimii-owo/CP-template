@@ -41,6 +41,12 @@ using ordered_set = __gnu_pbds::tree<
 >;
 
 #ifdef LOCAL
+
+#define DBG_FIELDS(...) \
+    auto debug_fields() const { \
+        return std::tie(__VA_ARGS__); \
+    }
+
 namespace cp_debug {
     template<class T>
     void print(const T& x, int depth = 0) {
@@ -50,17 +56,16 @@ namespace cp_debug {
         else if constexpr (ranges::input_range<const T>) {
             using V = remove_cvref_t<ranges::range_reference_t<const T>>;
 
-            constexpr bool nested =
+            constexpr bool multiline =
                 ranges::input_range<const V> &&
                 !requires(const V& v) { cerr << v; };
-
-            constexpr bool multiline = nested;
 
             cerr << '[';
             bool first = true;
 
             for (const auto& v : x) {
-                if (!first) cerr << ", ";
+                if (!first) cerr << (multiline ? "," : ", ");
+
                 if constexpr (multiline) {
                     cerr << '\n' << string(4 * (depth + 1), ' ');
                 }
@@ -75,14 +80,23 @@ namespace cp_debug {
 
             cerr << ']';
         }
+        else if constexpr (requires { x.debug_fields(); }) {
+            cp_debug::print(x.debug_fields(), depth);
+        }
         else if constexpr (requires { typename tuple_size<T>::type; }) {
-            cerr << '(';
+            cerr << '{';
             int i = 0;
-            apply([&](const auto&... v) {
+
+            std::apply([&](const auto&... v) {
                 ((cerr << (i++ ? ", " : ""),
-                cp_debug::print(v, depth)), ...);
+                  cp_debug::print(v, depth)), ...);
             }, x);
-            cerr << ')';
+
+            cerr << '}';
+        }
+        else if constexpr (is_class_v<T> && is_aggregate_v<T>) {
+            const auto& [...members] = x;
+            cp_debug::print(std::tie(members...), depth);
         }
         else {
             cerr << "<unsupported>";
@@ -92,7 +106,8 @@ namespace cp_debug {
     template<class... Ts>
     void log(const Ts&... args) {
         int i = 0;
-        ((cerr << (i++ ? ", " : ""), cp_debug::print(args)), ...);
+        ((cerr << (i++ ? ", " : ""),
+          cp_debug::print(args)), ...);
         cerr << '\n';
     }
 }
@@ -106,6 +121,7 @@ namespace cp_debug {
 #else
 
 #define dbg(...) ((void)0)
+#define DBG_FIELDS(...)
 
 #endif
 
