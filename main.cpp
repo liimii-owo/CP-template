@@ -141,7 +141,7 @@ constexpr int INF = 1 << 30;
 constexpr ll LINF = 1LL << 60;
 constexpr int MOD99 = 998244353;
 constexpr int MOD10 = 1000000007;
-constexpr long double PI = numbers::pi_v<long double>;
+constexpr long double PI = 3.141592653589793238462643383279502884L;
 constexpr long double EPS = 1e-9L;
 
 void solve() {
