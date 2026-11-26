@@ -1,5 +1,6 @@
 // https://github.com/liimii-owo/CP-template
 #include<bits/stdc++.h>
+#include<cassert>
 #include<ext/pb_ds/assoc_container.hpp>
 #include<ext/pb_ds/tree_policy.hpp>
 #define fi first
